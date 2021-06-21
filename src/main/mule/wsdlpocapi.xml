@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f3b9f6c1-99c1-4bbf-88b8-a4892a7575f3" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="92f3c0c5-1ab7-4330-ad90-beb5369c89a3" >
+		<wsc:connection wsdlLocation="http://www.dneonline.com/calculator.asmx?wsdl" service="Calculator" port="CalculatorSoap" address="http://www.dneonline.com/calculator.asmx" />
+	</wsc:config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="6ad33f95-fae7-4e2d-9ae2-0e52fb25b06a" >
+		<http:request-connection host="localhost" port="8082" connectionIdleTimeout="3000000"/>
+	</http:request-config>
+	<flow name="wsdlpocapiFlow" doc:id="f962c86a-43af-432f-81a4-6c8685a1ed93" >
+		<http:listener doc:name="Listener" doc:id="ab46483e-2e04-49a8-9558-102c603f4cc8" config-ref="HTTP_Listener_config" path="/{action}"/>
+		<set-variable value="#[attributes.uriParams.action]" doc:name="Set Variable" doc:id="568a7076-ac08-44a2-8c7e-908e26dd46f1" variableName="act"/>
+		<choice doc:name="Choice" doc:id="e10279b5-ad0d-4d7c-b30d-d0c9c2dac7b3" >
+			<when expression="#[vars.act == 'Add']">
+				<ee:transform doc:name="Transform Message" doc:id="f2fcb443-6ad7-4fcf-a90b-a08a8809f51d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://tempuri.org/
+---
+{
+	ns0#Add:{
+		ns0#intA:payload.value1,
+		ns0#intB:payload.value2
+		}
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<wsc:consume operation="Add" doc:name="Consume" doc:id="52ec00d9-a2bf-4c15-9add-4e06185ad74f" config-ref="Web_Service_Consumer_Config"/>
+				<ee:transform doc:name="Transform Message" doc:id="60439591-6fa0-4d3d-b901-3bdfe9631b80" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+
+output application/json
+---
+{
+	Result:{
+		Operation:vars.act,
+		Result:payload.body.AddResponse.AddResult
+	}
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[vars.act == 'Subtract']">
+				<ee:transform doc:name="Transform Message" doc:id="ac5783e1-0324-4c5a-b208-3d8348768e03" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://tempuri.org/
+---
+{
+	ns0#Subtract:{
+		ns0#intA:payload.value1,
+		ns0#intB:payload.value2
+		}
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<wsc:consume doc:name="Consume" doc:id="d0c92b11-4ed1-4622-a850-7a809ea120e2" config-ref="Web_Service_Consumer_Config" operation="Subtract"/>
+				<ee:transform doc:name="Transform Message" doc:id="09387600-cdab-46a3-8d6d-1359d98c93f9" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+
+output application/json
+---
+{
+	Result:{
+		Operation:vars.act,
+		Result:payload.body.AddResponse.AddResult
+	}
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[vars.act == 'Multiply']">
+				<ee:transform doc:name="Transform Message" doc:id="454cf4ff-fcf4-42cc-8daa-07586ec798f7" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://tempuri.org/
+---
+{
+	ns0#Multiply:{
+		ns0#intA:payload.value1,
+		ns0#intB:payload.value2
+		}
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<wsc:consume doc:name="Consume" doc:id="cdf860bd-4407-43d3-90e9-4f106c0cc6de" config-ref="Web_Service_Consumer_Config" operation="Multiply"/>
+				<ee:transform doc:name="Transform Message" doc:id="359403eb-c8fb-4518-8b11-5083f30fcdb7" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+
+output application/json
+---
+{
+	Result:{
+		Operation:vars.act,
+		Result:payload.body.AddResponse.AddResult
+	}
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[vars.act == 'Divide']">
+				<ee:transform doc:name="Transform Message" doc:id="14923335-86d2-40fe-b232-78e89a4b5e7c" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://tempuri.org/
+---
+{
+	ns0#Divide:{
+		ns0#intA:payload.value1,
+		ns0#intB:payload.value2
+		}
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<wsc:consume doc:name="Consume" doc:id="6886596f-14c6-4c15-8d72-5ac837f28fae" config-ref="Web_Service_Consumer_Config" operation="Divide"/>
+				<ee:transform doc:name="Transform Message" doc:id="fd24c48d-a61d-46c8-b915-26de1c4f2b49" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+
+output application/json
+---
+{
+	Result:{
+		Operation:vars.act,
+		Result:payload.body.AddResponse.AddResult
+	}
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="46751d1a-10d4-4ad8-a22a-8f2184e391ed" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "wrong input"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<http:request method="GET" doc:name="calling insurence api" doc:id="64a4ab3d-0232-47f1-905d-8dbd1d21eb14" config-ref="HTTP_Request_configuration" path="/insurence" responseTimeout="#[900000000]"/>
+		<flow-ref doc:name="Flow Reference" doc:id="5a53295a-9b57-47cf-9bad-69ce92138ee5" name="wsdlpocapiFlow1"/>
+	</flow>
+	<flow name="wsdlpocapiFlow1" doc:id="15f9718b-5712-45b0-a432-b8b2b5eb0afd" >
+		<ee:transform doc:name="Transform Message" doc:id="ae81f14a-f9ff-4660-9321-2e6fc3087b49" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload.insuranceparty]" doc:name="Set Variable" doc:id="6367d34d-14df-426d-a013-c0129979bf52" variableName="insuranceparty"/>
+		<choice doc:name="Choice" doc:id="829ff1af-ee24-4739-a4e1-b19c1585f05d" >
+			<when expression="#[sizeOf(payload.insuranceparty)&gt;0]">
+				<set-variable value="#[[]]" doc:name="Set Variable" doc:id="99eab17a-db1a-49eb-8d47-9b775da2738e" variableName="licPolicy"/>
+				<set-variable value="#[[]]" doc:name="Set Variable" doc:id="8c584c1b-e549-4eef-b157-0051295f8dc3" variableName="pubFundPolicy"/>
+				<foreach doc:name="For Each" doc:id="201cde40-50ea-4606-bbc6-d0156c7fc392" collection="#[payload.insuranceparty]">
+					<ee:transform doc:name="Transform Message" doc:id="63a58002-5809-4fe2-9fd0-71e1199f6f1e" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="licPolicy" ><![CDATA[%dw 2.0
+output application/java
+---
+if(payload.Inssysname == 'LIC')
+vars.licPolicy + payload.policyprice as Number
+else
+vars.licPolicy]]></ee:set-variable>
+							<ee:set-variable variableName="pubFundPolicy" ><![CDATA[%dw 2.0
+output application/java
+---
+if(payload.Inssysname == 'PubFund')
+vars.pubFundPolicy + payload.policyprice as Number
+else
+vars.pubFundPolicy]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</foreach>
+				<ee:transform doc:name="Transform Message" doc:id="40cca1d8-0477-441f-b5bc-ec6291b3f53a">
+						<ee:message>
+						</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="licPrice" ><![CDATA[%dw 2.0
+output application/java
+---
+sum(vars.licPolicy)]]></ee:set-variable>
+						<ee:set-variable variableName="pubFundPrice" ><![CDATA[%dw 2.0
+output application/java
+---
+sum(vars.pubFundPolicy)]]></ee:set-variable>
+					</ee:variables>
+					</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="f4b5f2ea-0839-4841-8e35-22c90df12bda">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"policyholdername": payload.policyholder,
+	"licPrice": vars.licPrice,
+	"pubFundPrice": vars.pubFundPrice,
+	
+	(payload.insuranceparty default [] map (a,b)->
+	"policydetailes":{
+			"code": a.Code,
+			"policyvalidity": a.validity.policyvalidity
+			
+		}
+	)
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+			</when>
+		</choice>
+	</flow>
+</mule>

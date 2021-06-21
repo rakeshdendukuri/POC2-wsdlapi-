@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="errorError_Handler" doc:id="31e68aaa-115b-4fdd-957c-8e1be1bcec8d" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8598107a-3fde-43e5-b607-5dcd2db25f5f" type="ANY"/>
+	</error-handler>
+	<error-handler name="errorError_Handler1" doc:id="6db6b233-5006-416f-8a6e-6a30296a3362" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4a285a77-ad60-4316-ba08-2de8f937f587" />
+	</error-handler>
+</mule>
